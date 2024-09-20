@@ -1,0 +1,23 @@
+name: Release github action
+
+on:
+  pull_request:
+    types:
+      - closed
+  workflow_dispatch: # Allow manual triggers
+
+permissions:
+  contents: write
+
+jobs:
+  release-github-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Release create tag github action
+        id: release_step
+        uses: ./  # This uses the local action defined in the repository
+        with:
+          github_token: '${{ secrets.GH_TOKEN }}'

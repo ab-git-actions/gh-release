@@ -1,0 +1,10 @@
+name: 'Create Release Tag'
+description: 'A GitHub Action to create a release tag if it does not exist.'
+inputs:
+  github_token:
+    description: 'GitHub token for authentication'
+    required: true
+runs:
+  using: 'node20'
+  pre:   'setup.js'
+  main: 'main.js'
