@@ -1,10 +1,16 @@
 const core = require('@actions/core');
 
 async function generateRelease() {
-    // Run semantic-release programmatically
-    const result = await import('semantic-release');
     try {
-        if (result) {
+        const { default: semanticRelease } = await import('semantic-release');
+        // Run semantic-release programmatically
+        const result = await semanticRelease({
+            branches: ['main'], // Adjust based on your branch configuration
+            dryRun: false, // Set to true for testing without creating a release
+        });
+
+        // Ensure the result exists and there is a next release
+        if (result && result.nextRelease) {
             const nextVersion = result.nextRelease.version;
             const releaseBody = result.nextRelease.notes;
             const latestSha = result.commit; // or retrieve the latest commit sha

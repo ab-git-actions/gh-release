@@ -25,7 +25,7 @@ async function run() {
         });
 
         // Logging the entire tags object
-        core.info(`\u001b[35mExisting GitHub tags: ${JSON.stringify(tags, null, 2)}`);
+        // core.info(`\u001b[35mExisting GitHub tags: ${JSON.stringify(tags, null, 2)}`);
 
         // Loop through the tags and log each one
         tags.forEach((tag) => {
