@@ -30,17 +30,20 @@ async function run() {
             core.info(`\u001b[35mExisting GitHub tags: ${tag.name}`);
         });
 
-        // Get the pull request details from the context
-        const pullRequest = github.context.payload.pull_request;
+        // // Get the pull request details from the context
+        // const pullRequest = github.context.payload.pull_request;
+        //
+        // // Check if the pull request is merged
+        // /** @type {boolean} */
+        // const isMerged = pullRequest.merged;
+        //
+        // // Check the base branch (where the PR was merged into)
+        // const baseBranch = pullRequest.base.ref;
 
-        // Check if the pull request is merged
-        /** @type {boolean} */
-        const isMerged = pullRequest.merged;
+        const pushEvent = (github.context.eventName === 'push')
+        const branchName = context.ref; // This will give you the branch name, like 'refs/heads/main'
 
-        // Check the base branch (where the PR was merged into)
-        const baseBranch = pullRequest.base.ref;
-
-        if (isMerged && (baseBranch === 'main' || baseBranch === 'master')) {
+        if (pushEvent && (branchName === 'main' || branchName === 'master')) {
             const { nextVersion, releaseBody, latestSha } = generateRelease();
 
             const createRelease= await octokit.rest.repos.createRelease({
