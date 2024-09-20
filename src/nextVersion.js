@@ -5,7 +5,7 @@ async function generateRelease() {
         const { default: semanticRelease } = await import('semantic-release');
         // Run semantic-release programmatically
         const result = await semanticRelease({
-            branches: ['main'], // Adjust based on your branch configuration
+            branches: ['main', 'master'], // Adjust based on your branch configuration
             dryRun: false, // Set to true for testing without creating a release
         });
 

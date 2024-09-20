@@ -16,8 +16,6 @@ async function run() {
         // const prTitle = github.context.payload.pull_request.tittle;
         // const releaseBody = prTitle + "-" + prNumber;
 
-        const { nextVersion, releaseBody, latestSha } = generateRelease();
-
         // Get existing git release tags from where the action is being executed
         const {data: tags} =  await octokit.rest.repos.listTags({
             owner: gitOrg,
@@ -43,6 +41,8 @@ async function run() {
         const baseBranch = pullRequest.base.ref;
 
         if (isMerged && (baseBranch === 'main' || baseBranch === 'master')) {
+            const { nextVersion, releaseBody, latestSha } = generateRelease();
+
             const createRelease= await octokit.rest.repos.createRelease({
                 owner: gitOrg,
                 repo: gitRepo,
