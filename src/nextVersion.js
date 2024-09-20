@@ -23,4 +23,4 @@ async function generateRelease() {
     }
 }
 
-module.exports = generateRelease;
+module.exports = { generateRelease };

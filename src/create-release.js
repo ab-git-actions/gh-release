@@ -5,7 +5,7 @@ const github = require('@actions/github');
 
 async function run() {
     try {
-        const generateRelease = await import('./nextVersion.js');
+        const { generateRelease } = await import('./nextVersion.js');
         const gitToken = core.getInput('github_token', {required: false});
         const octokit = github.getOctokit(gitToken);
         // const octokit = new GitHub(gitToken)
