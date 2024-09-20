@@ -1,20 +1,20 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const generateRelease  = require('./nextVersion')
 // const { GitHub, context } = require('@actions/github');
 
 
 async function run() {
     try {
+        const { generateRelease } = await import('./nextVersion.js');
         const gitToken = core.getInput('github_token', {required: false});
         const octokit = github.getOctokit(gitToken);
         // const octokit = new GitHub(gitToken)
 
         const { owner: gitOrg, repo: gitRepo } = github.context.repo;
         // const latestSha = github.context.sha;
-        const prNumber = github.context.payload.pull_request.number
-        const prTittle = github.context.payload.pull_request.tittle;
-        // const releaseBody = prTittle + "-" + prNumber;
+        // const prNumber = github.context.payload.pull_request.number
+        // const prTitle = github.context.payload.pull_request.tittle;
+        // const releaseBody = prTitle + "-" + prNumber;
 
         const { nextVersion, releaseBody, latestSha } = generateRelease();
 
