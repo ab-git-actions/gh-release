@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const { generateRelease } = require('./nextVersion')
+const generateRelease  = require('./nextVersion')
 // const { GitHub, context } = require('@actions/github');
 
 

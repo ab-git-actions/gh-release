@@ -1,7 +1,7 @@
 const semanticRelease = require('semantic-release');
 const core = require('@actions/core');
 
-export async function generateRelease() {
+async function generateRelease() {
     // Run semantic-release programmatically
     const result = await semanticRelease();
     try {
@@ -23,3 +23,5 @@ export async function generateRelease() {
         console.log(error);
     }
 }
+
+module.exports = generateRelease;
