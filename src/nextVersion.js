@@ -1,9 +1,8 @@
-const semanticRelease = require('semantic-release');
 const core = require('@actions/core');
 
 async function generateRelease() {
     // Run semantic-release programmatically
-    const result = await semanticRelease();
+    const result = await import('semantic-release');
     try {
         if (result) {
             const nextVersion = result.nextRelease.version;
