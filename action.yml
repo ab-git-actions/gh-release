@@ -3,6 +3,7 @@ description: 'A GitHub Action to create a release tag if it does not exist.'
 inputs:
   github_token:
     description: 'GitHub token for authentication'
+    default: ${{ github.token }}
     required: true
 runs:
   using: 'node20'
