@@ -5,7 +5,7 @@ const github = require('@actions/github');
 
 async function run() {
     try {
-        const { generateRelease } = await import('./nextVersion.js');
+        const generateRelease = await import('./nextVersion.js');
         const gitToken = core.getInput('github_token', {required: false});
         const octokit = github.getOctokit(gitToken);
         // const octokit = new GitHub(gitToken)
@@ -67,9 +67,6 @@ async function run() {
             // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
             core.setOutput("GitHub Release URL", releaseUrl)
         }
-
-
-        
     }catch(error) {
         core.setFailed(`Action failed with error: ${error.message}`);
     }

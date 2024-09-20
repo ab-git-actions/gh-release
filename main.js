@@ -1,5 +1,5 @@
-const { run } = require('./src/create-release');
+const run  = require('./src/create-release');
 
 if (require.main === module) {
-    run();
+    run().then(r => {});
 }
