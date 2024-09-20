@@ -41,7 +41,7 @@ async function run() {
         // const baseBranch = pullRequest.base.ref;
 
         const pushEvent = (github.context.eventName === 'push')
-        const branchName = github.context.ref; // This will give you the branch name, like 'refs/heads/main'
+        const branchName = github.context.ref.replace('refs/heads/', '');  // This will give you the branch name, like 'refs/heads/main'
 
         if (pushEvent && (branchName === 'main' || branchName === 'master')) {
             const { nextVersion, releaseBody, latestSha } = generateRelease();
