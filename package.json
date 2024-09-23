@@ -2,6 +2,7 @@
   "name": "gh-release",
   "version": "1.0.0",
   "description": "Action to create git release",
+  "private": true,
   "main": "main.js",
   "scripts": {
     "build": "esbuild src/create-release.js --bundle --platform=node --outfile=dist/index.js"
