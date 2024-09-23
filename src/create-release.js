@@ -94,6 +94,7 @@ function determineBumpType(commits) {
 
 // Calculate the next version using semver
 function calculateNextVersion(latestTag, bumpType) {
+    /**@type string*/
     const newVersion = semver.inc(latestTag, bumpType);
     core.info(`\u001b[38;5;6mNew version: ${newVersion}`);
     return newVersion;
@@ -137,7 +138,7 @@ async function run() {
                     owner: gitOrg,
                     repo: gitRepo,
                     tag_name: newVersion,
-                    target_commitish: latestTag,
+                    target_commitish: branchName,
                     name: newVersion,
                     body: "Testing",
                     prerelease: false,
