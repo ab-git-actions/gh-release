@@ -17,14 +17,15 @@ async function getLatestTag(owner, repo) {
         });
 
         if (tags.data.length === 0) {
-            console.log("No tags found in the repository.");
+            core.info('\u001b[38;5;6mNo tags found in the repository.');
             return null;
         }
 
         const latestTag = tags.data[0].name;
-        console.log(`Latest tag: ${latestTag}`);
+        core.info(`\u001b[38;5;6mLatest tag: ${latestTag}`);
         return latestTag;
     } catch (error) {
+        core.error(`\u001b[38;2;255;0;0mError fetching tags: ${error.message}`);
         core.setFailed(`Error fetching tags: ${error.message}`);
     }
 }
@@ -65,6 +66,7 @@ async function getCommitsSinceTag(owner, repo, latestTag) {
         console.log(`Commits since ${latestTag}:`, commitMessages);
         return commitMessages;
     } catch (error) {
+        core.error(`\u001b[38;2;255;0;0mError fetching commits: ${error.message}`);
         core.setFailed(`Error fetching commits: ${error.message}`);
     }
 }
@@ -86,14 +88,14 @@ function determineBumpType(commits) {
         }
     });
 
-    console.log(`Determined bump type: ${bumpType}`);
+    core.info(`\u001b[38;5;6mDetermined bump type: ${bumpType}`);
     return bumpType;
 }
 
 // Calculate the next version using semver
 function calculateNextVersion(latestTag, bumpType) {
     const newVersion = semver.inc(latestTag, bumpType);
-    console.log(`New version: ${newVersion}`);
+    core.info(`\u001b[38;5;6mNew version: ${newVersion}`);
     return newVersion;
 }
 
@@ -105,7 +107,7 @@ async function run() {
 
         if (latestTag) {
             // Step 2: Get commits since the latest tag
-            const commits = await getCommitsSinceTag(owner, repo, latestTag);
+            const commits = await getCommitsSinceTag(gitOrg, gitRepo, latestTag);
 
             // Step 3: Determine the bump type based on commit messages
             const bumpType = determineBumpType(commits);
