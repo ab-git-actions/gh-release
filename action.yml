@@ -5,6 +5,9 @@ inputs:
     description: 'GitHub token for authentication'
     default: ${{ github.token }}
     required: true
+outputs:
+  html_url:
+    description: 'The URL users can navigate to in order to view the release'
 runs:
   using: 'node20'
   pre:   'setup.js'
