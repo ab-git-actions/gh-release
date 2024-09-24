@@ -1,11 +1,11 @@
 name: Release github action
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
+    branches:
+      - 'main'
   workflow_dispatch: # Allow manual triggers
-
+  
 permissions:
   contents: write
 
@@ -16,8 +16,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Release create tag github action
-        id: release_step
-        uses: ./  # This uses the local action defined in the repository
-        with:
-          github_token: '${{ secrets.GH_TOKEN }}'
+      - name: Install Dependencies
+        run:  node setup.js
+        
+      - name: Install Dependencies
+        run:  node main.js
+        
