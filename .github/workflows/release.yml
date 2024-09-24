@@ -19,6 +19,7 @@ jobs:
       - name: Install Dependencies
         run:  node setup.js
         
-      - name: Install Dependencies
+      - name: Create Git Tag
         run:  node main.js
-        
+        env:
+          github_token: '${{ secrets.GH_TOKEN }}'

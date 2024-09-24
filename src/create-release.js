@@ -4,7 +4,7 @@ const semver = require('semver');
 
 
 const gitToken = core.getInput('github_token', {required: false});
-const octokit = github.getOctokit(gitToken);
+const octokit = github.getOctokit(gitToken || process.env.github_token);
 
 // Fetch the latest Git tag from the repository
 async function getLatestTag(owner, repo) {
