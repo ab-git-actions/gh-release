@@ -6,7 +6,7 @@ inputs:
     default: ${{ github.token }}
     required: false
 outputs:
-  html_url:
+  release_url:
     description: 'The URL users can navigate to in order to view the release'
 runs:
   using: 'node20'
