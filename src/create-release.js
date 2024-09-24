@@ -56,6 +56,7 @@ async function getCommitsSinceTag(owner, repo, latestTag) {
         // Filter commits after the latest tag
         const commitMessages = [];
         const prs = [];
+        const prSet = new Set(); // To track unique PR numbers
         let foundLatestTag = false;
 
         for (const commit of commits) {
@@ -73,15 +74,17 @@ async function getCommitsSinceTag(owner, repo, latestTag) {
                 commit_sha: commit.sha,
             });
 
-            if (associatedPRs.length > 0) {
-                associatedPRs.forEach((pr) => {
+            associatedPRs.forEach((pr) => {
+                if (!prSet.has(pr.number)) {
+                    prSet.add(pr.number); // Add the PR number to the Set
                     prs.push({
                         number: pr.number,
                         title: pr.title,
                         user: pr.user.login,
                     });
-                });
-            }
+                }
+            });
+
             // Add commits that are after the latest tag
             commitMessages.push(commitMessage);
         }
