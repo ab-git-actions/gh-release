@@ -103,7 +103,7 @@ async function getCommitsSinceTag(owner, repo, latestTag) {
 
 
 // Determine the type of version bump based on commit messages
-function determineBumpType(commits) {
+async function determineBumpType(commits) {
     let bumpType = 'patch'; // Default bump type
 
     commits.forEach((commit) => {
@@ -123,7 +123,7 @@ function determineBumpType(commits) {
 }
 
 // Calculate the next version using semver
-function calculateNextVersion(latestTag, bumpType) {
+async function calculateNextVersion(latestTag, bumpType) {
     /**
      * @type {string}
      * @returns A version to be used for gitHub create release tag
@@ -133,61 +133,104 @@ function calculateNextVersion(latestTag, bumpType) {
     return newVersion;
 }
 
+async function createGitRelease(owner, repo, newVersion, targetCommitish, releaseBody) {
+
+    const { data: { html_url: releaseUrl } } = await octokit.rest.repos.createRelease({
+        owner: owner,
+        repo: repo,
+        tag_name: newVersion,
+        target_commitish: targetCommitish, // The latest commit (HEAD)
+        name: newVersion,
+        body: releaseBody,
+        prerelease: false,
+        make_latest: 'true'
+    });
+
+    return releaseUrl;
+}
+
 async function run() {
     try {
         const { owner: gitOrg, repo: gitRepo } = github.context.repo;
 
+        const { eventName, ref } = github.context;
+        const pushEvent = (eventName === 'push');
+        const branchName = ref.replace('refs/heads/', '');
+
         const latestTag = await getLatestTag(gitOrg, gitRepo);
 
-        if (latestTag) {
-            // Get commits since the latest tag
-            const [commits, prs] = await getCommitsSinceTag(gitOrg, gitRepo, latestTag);
+        let newVersion;
 
-            // Determine the bump type based on commit messages
-            const bumpType = determineBumpType(commits);
+        // If no tags were found, latestTag would be null, meaning a new tag will be created
+        if (!latestTag) {
+            // Create the initial tag (v0.1.0) and release
+            newVersion = 'v0.1.0';
+            core.info('\u001b[38;5;6mCreating initial release v0.1.0.');
 
-            // Calculate the next version
-            const newVersion = calculateNextVersion(latestTag, bumpType);
+            const { data: commitData } = await octokit.rest.repos.getCommit({
+                owner: gitOrg,
+                repo: gitRepo,
+                ref: branchName,
+            });
 
-            // Create release body with PR information
-            let releaseBody = `### Changes since ${latestTag}\n\n`;
+            // Get commits and PRs for the "Initial release"
+            const [commits, prs] = await getCommitsSinceTag(gitOrg, gitRepo, commitData.sha);
+
+            // Create initial release body and append PR info
+            let releaseBody = "Initial release.\n\n";
+
             if (prs.length > 0) {
+                releaseBody += "### Pull Requests included in this release:\n";
                 prs.forEach((pr) => {
                     releaseBody += `- PR #${pr.number}: ${pr.title} by @${pr.user}\n`;
                 });
             } else {
-                releaseBody += "No new PRs since the latest tag.";
+                releaseBody += "No PRs included in this initial release.";
             }
 
-            core.info(`\x1b[38;5;214mRelease body content:\n${releaseBody}`);
+            const releaseUrl = await createGitRelease(gitOrg, gitRepo, newVersion, branchName, releaseBody);
 
-            const pushEvent = (github.context.eventName === 'push')
+            core.info(`\u001b[35mRelease created: ${releaseUrl}`);
 
-            // This will give you the branch name, like 'refs/heads/main'
-            const branchName = github.context.ref.replace('refs/heads/', '');
+            // Set the output variables for use by other actions
+            core.setOutput("release_url", releaseUrl);
 
-            if (pushEvent && (branchName === 'main' || branchName === 'master')) {
-
-                const createRelease = await octokit.rest.repos.createRelease({
-                    owner: gitOrg,
-                    repo: gitRepo,
-                    tag_name: newVersion,
-                    target_commitish: branchName,
-                    name: newVersion,
-                    body: releaseBody,
-                    prerelease: false,
-                    make_latest: 'true'
-                })
-
-                const { data: { html_url: releaseUrl } } = createRelease;
-
-                core.info(`\u001b[35m${releaseUrl}`);
-
-                // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
-                core.setOutput("GitHub Release URL", releaseUrl)
-            }
+            return; // Exit after creating the initial release
         }
 
+
+        // Get commits since the latest tag
+        const [commits, prs] = await getCommitsSinceTag(gitOrg, gitRepo, latestTag);
+
+        // Determine the bump type based on commit messages
+        const bumpType = await determineBumpType(commits);
+
+        // Calculate the next version
+        const nextVersion = await calculateNextVersion(latestTag, bumpType);
+
+        // Create release body with PR information
+        let releaseBody = `### Changes since ${latestTag}\n\n`;
+
+        if (prs.length > 0) {
+            prs.forEach((pr) => {
+                releaseBody += `- PR #${pr.number}: ${pr.title} by @${pr.user}\n`;
+            });
+        } else {
+            releaseBody += "No new PRs since the latest tag.";
+        }
+
+        core.info(`\x1b[38;5;214mRelease body content:\n${releaseBody}`);
+
+
+        if (pushEvent && (branchName === 'main' || branchName === 'master')) {
+
+            const releaseUrl = await createGitRelease(gitOrg, gitRepo, nextVersion, branchName, releaseBody);
+
+            core.info(`\u001b[35m${releaseUrl}`);
+
+            // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
+            core.setOutput("release_url", releaseUrl)
+        }
     }catch(error) {
         core.setFailed(`Action failed with error: ${error.message}`);
     }
