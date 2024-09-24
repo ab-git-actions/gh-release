@@ -12,7 +12,6 @@ async function getLatestTag(owner, repo) {
         const {data: tags} = await octokit.rest.repos.listTags({
             owner,
             repo,
-            per_page: 1 // Get only the latest tag
         });
 
         if (tags.length === 0) {
@@ -54,36 +53,28 @@ async function getCommitsSinceTag(owner, repo, latestTag) {
             per_page: 100, // Adjust as necessary
         });
 
-
         // Filter commits after the latest tag
         const commitMessages = [];
         const prs = [];
         let foundLatestTag = false;
 
-        const associatedPRs = octokit.rest.repos.listPullRequestsAssociatedWithCommit({
-            owner,
-            repo,
-            commit_sha: commit.sha,
-        });
-
-
-
-        // Await all promises at once
-        const prResults = await Promise.all(prPromises);
-
-        prResults.forEach((associatedPRs, index) => {
-            const commit = commits[index];
+        for (const commit of commits) {
             const commitMessage = commit.commit.message;
-
 
             // Stop adding commits once the latest tag is found in commit history
             if (commit.sha === tagCommitSha) {
                 foundLatestTag = true;
-                return;
+                break;
             }
 
-            if (associatedPRs.data.length > 0) {
-                associatedPRs.data.forEach((pr) => {
+            const {data: associatedPRs} = await octokit.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner,
+                repo,
+                commit_sha: commit.sha,
+            });
+
+            if (associatedPRs.length > 0) {
+                associatedPRs.forEach((pr) => {
                     prs.push({
                         number: pr.number,
                         title: pr.title,
@@ -91,12 +82,9 @@ async function getCommitsSinceTag(owner, repo, latestTag) {
                     });
                 });
             }
-
             // Add commits that are after the latest tag
             commitMessages.push(commitMessage);
-
-        });
-
+        }
 
         if (!foundLatestTag) {
             core.warning("\u001b[38;2;255;0;0mWarning: Could not find the latest tag in the commit history.");
